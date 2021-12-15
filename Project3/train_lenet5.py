@@ -9,13 +9,13 @@ python train_lenet5.py \
 """
 import argparse
 import os
-import torch
 
+import torch
 from torch import nn
 from torchvision import datasets, transforms
 
-from models.LeNet5 import LeNet5
 from eval.metrics import get_accuracy
+from models.LeNet5 import LeNet5
 
 # --------------- Arguments ---------------
 
@@ -35,7 +35,6 @@ args = parser.parse_args()
 # --------------- Loading ---------------
 
 def train(model, train_loader, test_loader, optimizer, loss_fn):
-
     for epoch in range(args.epoch_start, args.epoch_end):
         print(f"Epoch {epoch}\n-------------------------------")
         size = len(train_loader.dataset)
@@ -62,6 +61,7 @@ def train(model, train_loader, test_loader, optimizer, loss_fn):
 
         torch.save(model.state_dict(), args.checkpoint_dir + f'epoch-{epoch}.pth')
 
+
 if __name__ == '__main__':
 
     train_loader = torch.utils.data.DataLoader(
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                        transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
-                           ])),
+                       ])),
         batch_size=args.batch_size, shuffle=True)
 
     test_loader = torch.utils.data.DataLoader(
