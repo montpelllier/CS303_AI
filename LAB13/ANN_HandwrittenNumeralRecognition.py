@@ -63,30 +63,23 @@ def Loss(lable, logits):
     return loss_tmp
 
 
-def Back_propagation(logits, label, w1, b1, w2, b2, w3, b3, a2, a1, image_blob):
+def Back_propagation(logits, label, w1, b1, w2, b2, w3, b3):
     # lable : Actual label  BATCHSIZE *class
     # logits : The predicted results of your model
     # Your code starts here
     dE_a3 = logits - label  # 10 *100
-    dE_a2 = np.dot(dE_a3, np.transpose(w3)) * d_relu(a2)
-    dE_a1 = np.dot(dE_a2, np.transpose(w2)) * d_relu(a1)
-    # da3_b = sum(dE_a3)
-    # da2_b = sum(dE_a2)
-    # da1_b = sum(dE_a1)
-
     d_w3 = np.dot(np.transpose(a2), dE_a3)
-    # print("d_w3:", np.shape(d_w3))
-    d_b3 = sum(dE_a3)
-    # print("d_b3:", np.shape(d_b3))
-    # (300 * 100)
+    d_b3 = np.sum(dE_a3, axis=0)
+
+    dE_a2 = np.dot(dE_a3, np.transpose(w3))
+    dE_a2 = dE_a2 * d_relu(a2)
     d_w2 = np.dot(np.transpose(a1), dE_a2)
-    # print("d_w2:", np.shape(d_w2))
-    d_b2 = sum(dE_a2)  # (100 * 1)
-    # print("d_b2:", np.shape(d_b2))
+    d_b2 = np.sum(dE_a2, axis=0)  # (100 * 1)
+
+    dE_a1 = np.dot(dE_a2, np.transpose(w2))
+    dE_a1 = dE_a1 * d_relu(a1)
     d_w1 = np.dot(np.transpose(image_blob), dE_a1)
-    # print("d_w1:", np.shape(d_w1))
-    d_b1 = sum(dE_a1)
-    # print("d_b1:", np.shape(d_b1))
+    d_b1 = np.sum(dE_a1, axis=0)
     # Your code ends here
     return d_w1, d_b1, d_w2, d_b2, d_w3, d_b3
 
@@ -118,6 +111,7 @@ if __name__ == '__main__':
 
     accuracy = np.zeros((EPOCH))  # save the accuracy of each epoch
     for epoch in range(0, EPOCH):
+        #lr = LR_BASE
         if epoch <= EPOCH / 2:
             lr = LR_BASE
         else:
@@ -132,9 +126,6 @@ if __name__ == '__main__':
             a2 = Hidden_Layer(a1, w2, b2, BATCHSIZE)
             # Forward propagation  output Layer
             a3 = Output_Layer(a2, w3, b3, BATCHSIZE)
-            # print(np.shape(a1))
-            # print(np.shape(a2))
-            # print(np.shape(a3))
             if np.count_nonzero(a3) != 1000:
                 print(a3)
             # comupte loss
@@ -145,7 +136,7 @@ if __name__ == '__main__':
                 print('Epoch ' + str(epoch + 1) + ': ')
                 print(loss_tmp)
             # Back propagation
-            d_w1, d_b1, d_w2, d_b2, d_w3, d_b3 = Back_propagation(a3, label, w1, b1, w2, b2, w3, b3, a2, a1, image_blob)
+            d_w1, d_b1, d_w2, d_b2, d_w3, d_b3 = Back_propagation(a3, label, w1, b1, w2, b2, w3, b3)
 
             # Gradient update
             w1 = w1 - lr * d_w1 / BATCHSIZE - lr * k * w1
