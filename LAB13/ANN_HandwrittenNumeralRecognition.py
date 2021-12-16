@@ -1,9 +1,9 @@
-import os
-import numpy as np
 import pickle
 
-from utils import xavier, gaussian, relu, d_relu, softmax, getLabel
 import matplotlib
+import numpy as np
+
+from utils import xavier, relu, d_relu, softmax, getLabel
 
 print(matplotlib.get_backend())
 # matplotlib.use('Agg')
@@ -24,9 +24,9 @@ def Parameter_initialization(num_input, num_layer1, num_layer2, num_output):
     b1 = np.zeros((1, num_layer1))
     b2 = np.zeros((1, num_layer2))
     b3 = np.zeros((1, num_output))
-    b1 = xavier(b1)
-    b2 = xavier(b2)
-    b3 = xavier(b3)
+    # b1 = xavier(b1)
+    # b2 = xavier(b2)
+    # b3 = xavier(b3)
     # Your code ends here
     Parameter['w1'] = w1
     Parameter['b1'] = b1
@@ -39,7 +39,7 @@ def Parameter_initialization(num_input, num_layer1, num_layer2, num_output):
 
 def Hidden_Layer(x, w, b, batch_size):
     # Your code starts here
-    a = np.dot(x, w) - np.tile(b, (batch_size, 1))
+    a = np.dot(x, w) + np.tile(b, (batch_size, 1))
     a = relu(a)
     # Your code ends here
     return a
@@ -47,7 +47,7 @@ def Hidden_Layer(x, w, b, batch_size):
 
 def Output_Layer(x, w, b, batch_size):
     # Your code starts here
-    a = np.dot(x, w) - np.tile(b, (batch_size, 1))
+    a = np.dot(x, w) + np.tile(b, (batch_size, 1))
     a = softmax(a)
     # Your code ends here
     return a
@@ -57,9 +57,8 @@ def Loss(lable, logits):
     # lable : Actual label  BATCHSIZE *class
     # logits : The predicted results of your model
     # Your code starts here
-    loss_tmp = np.multiply(lable, -np.log(logits))
-    loss_tmp = np.sum(loss_tmp) / np.shape(loss_tmp)[0]
-
+    loss_tmp = np.multiply(-lable, np.log(logits))
+    loss_tmp = np.sum(loss_tmp)
     # Your code ends here
     return loss_tmp
 
@@ -69,43 +68,24 @@ def Back_propagation(logits, label, w1, b1, w2, b2, w3, b3, a2, a1, image_blob):
     # logits : The predicted results of your model
     # Your code starts here
     dE_a3 = logits - label  # 10 *100
-    # print("dE_a3:", np.shape(dE_a3))
     dE_a2 = np.dot(dE_a3, np.transpose(w3)) * d_relu(a2)
-    # print("dE_a2:", np.shape(dE_a2))
     dE_a1 = np.dot(dE_a2, np.transpose(w2)) * d_relu(a1)
-    # print("dE_a1:", np.shape(dE_a1))
-    # da3_w = np.transpose(a2)  # 100*1
-    da3_b = np.tile(-1, (1, np.shape(dE_a3)[1]))
-
-    #da3_z = np.transpose(w3)
-    # da3_z = np.transpose(w3)
-    # dz2 = np.transpose(d_relu(a2))
-    # da2_w = np.transpose(a1)
-    da2_b = np.tile(-1, (1, np.shape(dE_a2)[1]))
-
-    #da2_z = np.transpose(w2)
-    # da2_z = 1
-    # dz1 = np.transpose(d_relu(a1))
-    # da1_w = np.transpose(image_blob)
-    da1_b = np.tile(-1, (1, np.shape(dE_a1)[1]))
-    # print(np.shape(w3))
-    # print(np.shape(w2))
-    # print(np.shape(w1))
+    # da3_b = sum(dE_a3)
+    # da2_b = sum(dE_a2)
+    # da1_b = sum(dE_a1)
 
     d_w3 = np.dot(np.transpose(a2), dE_a3)
     # print("d_w3:", np.shape(d_w3))
-    d_b3 = da3_b
+    d_b3 = sum(dE_a3)
     # print("d_b3:", np.shape(d_b3))
-
-    #d_w2 = np.dot(da2_w, np.dot(np.dot(dL, da3_z), dz2))  # (300 * 100)
+    # (300 * 100)
     d_w2 = np.dot(np.transpose(a1), dE_a2)
     # print("d_w2:", np.shape(d_w2))
-    d_b2 = da2_b # (100 * 1)
+    d_b2 = sum(dE_a2)  # (100 * 1)
     # print("d_b2:", np.shape(d_b2))
-
     d_w1 = np.dot(np.transpose(image_blob), dE_a1)
     # print("d_w1:", np.shape(d_w1))
-    d_b1 = da1_b
+    d_b1 = sum(dE_a1)
     # print("d_b1:", np.shape(d_b1))
     # Your code ends here
     return d_w1, d_b1, d_w2, d_b2, d_w3, d_b3
@@ -149,10 +129,7 @@ if __name__ == '__main__':
             # Forward propagation  Hidden Layer
             a1 = Hidden_Layer(image_blob, w1, b1, BATCHSIZE)
             # print(np.shape(image_blob))
-
-            # z1 = relu(a1)
             a2 = Hidden_Layer(a1, w2, b2, BATCHSIZE)
-            # z2 = relu(a2)
             # Forward propagation  output Layer
             a3 = Output_Layer(a2, w3, b3, BATCHSIZE)
             # print(np.shape(a1))
