@@ -67,6 +67,7 @@ def Back_propagation(logits, label, w1, b1, w2, b2, w3, b3):
     # lable : Actual label  BATCHSIZE *class
     # logits : The predicted results of your model
     # Your code starts here
+    # note: d_relu(a) will change the value of a
     dE_a3 = logits - label  # 10 *100
     d_w3 = np.dot(np.transpose(a2), dE_a3)
     d_b3 = np.sum(dE_a3, axis=0)
