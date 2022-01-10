@@ -20,7 +20,7 @@ def relu(ndarray):
     return np.maximum(ndarray, 0)
 
 
-def d_relu(ndarray): # 怎么会改入参的啊？
+def d_relu(ndarray):
     ndarray[ndarray > 0] = 1
     return ndarray
 
